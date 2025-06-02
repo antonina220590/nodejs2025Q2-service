@@ -6,6 +6,7 @@ import { DbModule } from './db/db.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ArtistModule } from './artist/artist.module';
+import { AlbumModule } from './album/album.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ArtistModule } from './artist/artist.module';
     UserModule,
     AuthModule,
     ArtistModule,
+    AlbumModule,
   ],
   controllers: [AppController],
   providers: [AppService],
