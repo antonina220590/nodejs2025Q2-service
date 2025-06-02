@@ -2,6 +2,8 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import { DbService } from '../db/db.service';
@@ -15,6 +17,7 @@ export class AlbumService {
   constructor(
     private db: DbService,
     private favoritesService: FavoritesService,
+    @Inject(forwardRef(() => TrackService))
     private trackService: TrackService,
   ) {}
 

@@ -10,12 +10,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {
-    console.log(
-      'AuthService constructor, JWT_SECRET_KEY:',
-      this.configService.get<string>('JWT_SECRET_KEY'),
-    );
-  }
+  ) {}
 
   async validateUser(login: string, pass: string): Promise<any> {
     const user = await this.userService.findOneByLogin(login);

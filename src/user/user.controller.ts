@@ -1,14 +1,42 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Put,
+  Body,
+  Delete,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { UserService } from './user.service';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.findOneById(id);
+  }
+
+  @Put(':id')
+  updatePassword(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updatePasswordDto: UpdatePasswordDto,
+  ) {
+    return this.userService.updatePassword(id, updatePasswordDto);
+  }
+
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.remove(id);
   }
 }

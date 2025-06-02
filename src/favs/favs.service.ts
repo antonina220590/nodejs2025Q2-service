@@ -81,6 +81,5 @@ export class FavoritesService {
     if (artistIndex !== -1) {
       this.db.favorites.artists.splice(artistIndex, 1);
     }
-    this.db.favorites.artists.splice(artistIndex, 1);
   }
 }

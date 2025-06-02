@@ -6,6 +6,13 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {
+    const secret = configService.get<string>('JWT_SECRET_KEY');
+
+    // V-- ДОБАВЬ ЭТОТ ЛОГ ДЛЯ ДЕБАГА --V
+    console.log(
+      'JwtStrategy constructor, JWT_SECRET_KEY received by ConfigService:',
+      secret,
+    );
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
