@@ -3,10 +3,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { DbService } from '../db/db.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { FavoritesService } from '../favs/favs.service';
+import { TrackService } from '../track/track.service';
+import { AlbumService } from '../album/album.service';
 
 @Injectable()
 export class ArtistService {
-  constructor(private db: DbService) {}
+  constructor(
+    private db: DbService,
+    private favoritesService: FavoritesService,
+    private trackService: TrackService,
+    private albumService: AlbumService,
+  ) {}
 
   create(createArtistDto: CreateArtistDto) {
     const newArtist = {
@@ -37,6 +45,9 @@ export class ArtistService {
 
   remove(id: string) {
     this.findOne(id);
+    this.albumService.removeArtistIdReference(id);
+    this.trackService.removeArtistIdReference(id);
+    this.favoritesService.removeArtist(id);
     this.db.artists = this.db.artists.filter((artist) => artist.id !== id);
   }
 }

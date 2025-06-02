@@ -7,10 +7,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { DbService } from '../db/db.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { FavoritesService } from '../favs/favs.service';
 
 @Injectable()
 export class TrackService {
-  constructor(private db: DbService) {}
+  constructor(
+    private db: DbService,
+    private favoritesService: FavoritesService,
+  ) {}
 
   private checkDependencies(dto: CreateTrackDto | UpdateTrackDto) {
     if (dto.artistId) {
@@ -61,6 +65,22 @@ export class TrackService {
 
   remove(id: string) {
     this.findOne(id);
+    this.favoritesService.removeTrack(id);
     this.db.tracks = this.db.tracks.filter((track) => track.id !== id);
+  }
+  removeArtistIdReference(artistId: string) {
+    this.db.tracks.forEach((track) => {
+      if (track.artistId === artistId) {
+        track.artistId = null;
+      }
+    });
+  }
+
+  removeAlbumIdReference(albumId: string) {
+    this.db.tracks.forEach((track) => {
+      if (track.albumId === albumId) {
+        track.albumId = null;
+      }
+    });
   }
 }

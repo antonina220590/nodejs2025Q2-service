@@ -78,8 +78,8 @@ export class FavoritesService {
 
   removeArtist(id: string) {
     const artistIndex = this.db.favorites.artists.indexOf(id);
-    if (artistIndex === -1) {
-      throw new NotFoundException('Artist not found in favorites');
+    if (artistIndex !== -1) {
+      this.db.favorites.artists.splice(artistIndex, 1);
     }
     this.db.favorites.artists.splice(artistIndex, 1);
   }
