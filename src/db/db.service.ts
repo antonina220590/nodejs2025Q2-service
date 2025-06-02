@@ -1,5 +1,3 @@
-// src/db/db.service.ts
-
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
