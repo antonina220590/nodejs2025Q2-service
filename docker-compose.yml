@@ -1,0 +1,44 @@
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres_db_container
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - homelibrary-net
+
+  nest-app:
+    build: .
+    container_name: nest_app_container
+    restart: always
+    depends_on:
+      - postgres-db
+    ports:
+      - '${PORT}:${PORT}'
+    environment:
+      - PORT=${PORT}
+      - POSTGRES_HOST=postgres-db
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_SECRET_REFRESH_KEY=${JWT_SECRET_REFRESH_KEY}
+    volumes:
+      - ./src:/usr/src/app/src
+    networks:
+      - homelibrary-net
+
+networks:
+  homelibrary-net:
+    driver: bridge
+
+volumes:
+  pgdata:
