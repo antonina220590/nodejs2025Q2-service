@@ -1,99 +1,108 @@
-## Home Library Service
+# Home Library Service
 
-This is a REST API for a home music library service. The application allows users to sign up, log in, and manage their collection of artists, albums, and tracks, including adding them to a favorites list.
+This is a REST API for a home music library service. The application allows users to register, log in, and manage their collection of artists, albums, and tracks, as well as add them to their favorites.
 
-### Technologies Used
+---
 
-- Node.js
-- NestJS
-- TypeScript
-- JWT for authentication
+## 🚀 Features
 
-### Installation
+- CRUD operations for users, tracks, albums, and artists.
+- "Favorites" system for adding beloved tracks, albums, and artists.
+- Complete OpenAPI (Swagger) API specification.
+- The application is fully containerized using Docker and Docker Compose.
 
-1. Clone the repository to your local machine:
+---
 
-   `git clone <YOUR_REPOSITORY_URL>`
+## 🛠️ Tech Stack
 
-2. Navigate to the project directory:
+- **Backend:** [NestJS](https://nestjs.com/), [TypeScript](https://www.typescriptlang.org/)
+- **Database:** [PostgreSQL](https://www.postgresql.org/)
+- **ORM:** [TypeORM](https://typeorm.io/)
+- **Containerization:** [Docker](https://www.docker.com/), [Docker Compose](https://docs.docker.com/compose/)
+- **Authentication:** [JWT](https://jwt.io/)
 
-   `cd nodejs2025Q2-service`
+---
 
-3. Install all required dependencies:
+## ⚙️ Installation and Setup
 
-   `npm install`
+To run this project on your machine, you need **Docker** and **Docker Desktop** installed.
 
-### Configuration
+#### 1. Clone the repository
 
-Before running the application, you need to set up your environment variables.
+```bash
+git clone <YOUR_REPOSITORY_URL>
+cd <YOUR_PROJECT_FOLDER>
+```
 
-- Create a .env file in the root directory of the project.
+#### 2. Create an environment file
 
-- You can copy the contents from .env.example (if it exists) or add the following variables:
+Create a file named `.env` in the project's root folder. Copy the contents below into it and replace the values if necessary.
 
+```
+# Port for the application to run on
 PORT=4000
-JWT_SECRET_KEY=YOUR_VERY_SECRET_KEY
-JWT_REFRESH_SECRET_KEY=YOUR_VERY_SECRET_REFRESH_KEY
-JWT_SECRET_EXPIRES_IN=1h
-JWT_REFRESH_SECRET_EXPIRES_IN=24h
 
-### Running the App
+# PostgreSQL connection variables
+POSTGRES_HOST=postgres-db
+POSTGRES_PORT=5432
+POSTGRES_USER=testuser
+POSTGRES_PASSWORD=testpassword
+POSTGRES_DB=testdb
 
-The application can be run in several modes:
+# Salt for password hashing
+CRYPT_SALT=10
 
-    Development mode (with hot-reload):
+# Secret keys and expiration times for JWT tokens
+JWT_SECRET_KEY=secret-key
+JWT_SECRET_REFRESH_KEY=secret-refresh-key
+TOKEN_EXPIRE_TIME=1h
+TOKEN_REFRESH_EXPIRE_TIME=24h
+```
 
-npm run start:dev
+#### 3. Run the application via Docker Compose
 
-Debug mode (with hot-reload and inspector attached):
+Execute a single command that will build the images, create, and run the containers for the application and the database:
 
-npm run start:debug
+```bash
+docker compose up --build
+```
 
-Production mode:
+The application will launch in hot-reload mode, and any changes in the `src` folder will automatically trigger a restart.
 
-    # First, build the project for production
-    npm run build
+After a successful launch, the service will be available at `http://localhost:4000`.
 
-    # Then, run the compiled app
-    npm run start:prod
+---
 
-Once started, the service will be available at http://localhost:4000 (or the port specified in your .env file).
+## 🧪 Testing
 
-### Test
+To run tests, execute one of the following commands:
 
-This project includes a comprehensive set of tests. You can run them using the following commands:
-
-    Run all primary test suites:
+```bash
 
 npm run test
 
-Run tests in watch mode (reruns tests on file changes):
 
 npm run test:watch
 
-Run tests with a coverage report:
-
 npm run test:cov
+```
 
-Run only authentication-related tests:
+---
 
-    npm run test:auth
+## 🛡️ Vulnerability Scanning
 
-### API Documentation
+To check dependencies for vulnerabilities, run the following command:
 
-The service provides a RESTful API to manage the music library.
-Authentication
+```bash
+npm run scan
+```
 
-Most endpoints are protected. To access them, you must:
+---
 
-    Sign up a new user via the POST /auth/signup endpoint.
-    Log in via POST /auth/login with your credentials to receive an accessToken.
-    Include this token in the Authorization header for every subsequent protected request.
+## 🐳 Docker Hub Image
 
-Example Header:
-Authorization: Bearer <YOUR_ACCESS_TOKEN>
-OpenAPI Specification
+The ready-to-use application image is available on Docker Hub and can be downloaded using the command:
 
-A complete and detailed specification for all endpoints, data models (DTOs), and response codes is available in the doc/api.yml file, following the OpenAPI standard.
-
-You can use this specification with tools like the Swagger Editor or Postman to interactively explore and test the API.
+```bash
+docker pull antoninatyurina/home-library-service:1.0.0
+```
