@@ -1,89 +1,83 @@
 import {
-  ConflictException,
-  Injectable,
   ForbiddenException,
+  Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DbService } from '../db/db.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { UserEntity } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
   constructor(
-    private db: DbService,
-    private configService: ConfigService,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
   ) {}
 
-  async findOneByLogin(login: string) {
-    return this.db.users.find((user) => user.login === login);
+  async create(createUserDto: CreateUserDto): Promise<UserEntity> {
+    const saltRounds = parseInt(process.env.CRYPT_SALT, 10);
+    const hashedPassword = await bcrypt.hash(
+      createUserDto.password,
+      saltRounds,
+    );
+
+    const user = this.userRepository.create({
+      ...createUserDto,
+      password: hashedPassword,
+    });
+
+    return this.userRepository.save(user);
   }
 
-  async findOneById(id: string) {
-    const user = this.db.users.find((user) => user.id === id);
+  async findAll(): Promise<UserEntity[]> {
+    return this.userRepository.find();
+  }
+
+  async findOneById(id: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOneBy({ id });
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(`User with id ${id} not found`);
     }
     return user;
   }
 
-  async findAll() {
-    return this.db.users.map((user) => {
-      const { ...rest } = user;
-      return rest;
-    });
+  async findOneByLogin(login: string): Promise<UserEntity | undefined> {
+    return this.userRepository.findOneBy({ login });
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const userExists = await this.findOneByLogin(createUserDto.login);
-    if (userExists) {
-      throw new ConflictException('User with this login already exists');
-    }
-    const salt = parseInt(this.configService.get<string>('CRYPT_SALT', '10'));
-    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
-
-    const newUser = {
-      id: uuidv4(),
-      login: createUserDto.login,
-      password: hashedPassword,
-      version: 1,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    };
-
-    this.db.users.push(newUser);
-
-    const { ...userWithoutPassword } = newUser;
-    return userWithoutPassword;
-  }
-
-  async updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
+  async updatePassword(
+    id: string,
+    updatePasswordDto: UpdatePasswordDto,
+  ): Promise<UserEntity> {
     const user = await this.findOneById(id);
 
-    const isOldPasswordCorrect = await bcrypt.compare(
+    const isPasswordCorrect = await bcrypt.compare(
       updatePasswordDto.oldPassword,
       user.password,
     );
 
-    if (!isOldPasswordCorrect) {
+    if (!isPasswordCorrect) {
       throw new ForbiddenException('Old password is wrong');
     }
 
-    const salt = parseInt(this.configService.get<string>('CRYPT_SALT', '10'));
-    user.password = await bcrypt.hash(updatePasswordDto.newPassword, salt);
-    user.version += 1;
-    user.updatedAt = Date.now();
+    const saltRounds = parseInt(process.env.CRYPT_SALT, 10);
+    const newHashedPassword = await bcrypt.hash(
+      updatePasswordDto.newPassword,
+      saltRounds,
+    );
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    user.password = newHashedPassword;
+    return this.userRepository.save(user);
   }
 
-  async remove(id: string) {
-    await this.findOneById(id);
-    this.db.users = this.db.users.filter((user) => user.id !== id);
+  async remove(id: string): Promise<void> {
+    const result = await this.userRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
   }
 }
