@@ -106,3 +106,5 @@ The ready-to-use application image is available on Docker Hub and can be downloa
 ```bash
 docker pull antoninatyurina/home-library-service:1.0.0
 ```
+
+full address: https://hub.docker.com/repositories/antoninatyurina
