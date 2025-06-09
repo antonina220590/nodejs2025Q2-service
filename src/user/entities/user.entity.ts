@@ -1,4 +1,4 @@
-import { Exclude } from 'class-transformer';
+import { Type, Exclude } from 'class-transformer';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -24,9 +24,11 @@ export class UserEntity {
   version: number;
 
   @Column({ type: 'bigint' })
+  @Type(() => Number)
   createdAt: number;
 
   @Column({ type: 'bigint' })
+  @Type(() => Number)
   updatedAt: number;
 
   @BeforeInsert()

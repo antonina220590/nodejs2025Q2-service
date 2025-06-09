@@ -13,8 +13,14 @@ export class AlbumService {
   ) {}
 
   async create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
-    const album = this.albumRepository.create(createAlbumDto);
-    return this.albumRepository.save(album);
+    const { artistId, ...rest } = createAlbumDto;
+
+    const newAlbum = this.albumRepository.create({
+      ...rest,
+      artist: artistId ? { id: artistId } : null,
+    });
+
+    return this.albumRepository.save(newAlbum);
   }
 
   async findAll(): Promise<AlbumEntity[]> {
@@ -36,13 +42,19 @@ export class AlbumService {
     id: string,
     updateAlbumDto: UpdateAlbumDto,
   ): Promise<AlbumEntity> {
+    const { artistId, ...rest } = updateAlbumDto;
+
     const album = await this.albumRepository.preload({
       id,
-      ...updateAlbumDto,
+      ...rest,
+
+      ...(artistId && { artist: { id: artistId } }),
     });
+
     if (!album) {
       throw new NotFoundException(`Album with id ${id} not found`);
     }
+
     return this.albumRepository.save(album);
   }
 

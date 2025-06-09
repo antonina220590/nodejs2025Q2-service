@@ -13,8 +13,15 @@ export class TrackService {
   ) {}
 
   async create(createTrackDto: CreateTrackDto): Promise<TrackEntity> {
-    const track = this.trackRepository.create(createTrackDto);
-    return this.trackRepository.save(track);
+    const { artistId, albumId, ...rest } = createTrackDto;
+
+    const newTrack = this.trackRepository.create({
+      ...rest,
+      artist: artistId ? { id: artistId } : null,
+      album: albumId ? { id: albumId } : null,
+    });
+
+    return this.trackRepository.save(newTrack);
   }
 
   async findAll(): Promise<TrackEntity[]> {
