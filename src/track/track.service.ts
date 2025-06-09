@@ -24,7 +24,7 @@ export class TrackService {
   async findOne(id: string): Promise<TrackEntity> {
     const track = await this.trackRepository.findOne({
       where: { id },
-      relations: ['artist', 'album'], // Загружаем связанные сущности
+      relations: ['artist', 'album'],
     });
     if (!track) {
       throw new NotFoundException(`Track with id ${id} not found`);
