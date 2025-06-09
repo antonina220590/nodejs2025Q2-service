@@ -4,6 +4,7 @@ import {
   Param,
   ParseUUIDPipe,
   Put,
+  Post,
   Body,
   Delete,
   HttpCode,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -19,6 +21,11 @@ export class UserController {
   @Get()
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
   }
 
   @Get(':id')

@@ -1,21 +1,45 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { ConfigModule } from '@nestjs/config';
 import { AppService } from './app.service';
-import { DbModule } from './db/db.module';
 import { UserModule } from './user/user.module';
-import { AuthModule } from './auth/auth.module';
 import { ArtistModule } from './artist/artist.module';
 import { AlbumModule } from './album/album.module';
 import { TrackModule } from './track/track.module';
 import { FavoritesModule } from './favs/favs.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserEntity } from './user/entities/user.entity';
+import { TrackEntity } from './track/entities/track.entity';
+import { ArtistEntity } from './artist/entities/artist.entity';
+import { AlbumEntity } from './album/entities/album.entity';
+import { FavoritesEntity } from './favs/entities/favorites.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    DbModule,
+
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.get<string>('POSTGRES_HOST'),
+        port: parseInt(configService.get<string>('POSTGRES_PORT')),
+        username: configService.get<string>('POSTGRES_USER'),
+        password: configService.get<string>('POSTGRES_PASSWORD'),
+        database: configService.get<string>('POSTGRES_DB'),
+        synchronize: true,
+        entities: [
+          UserEntity,
+          TrackEntity,
+          ArtistEntity,
+          AlbumEntity,
+          FavoritesEntity,
+        ],
+      }),
+      inject: [ConfigService],
+    }),
+
     UserModule,
-    AuthModule,
     ArtistModule,
     AlbumModule,
     TrackModule,

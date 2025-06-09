@@ -19,8 +19,15 @@ export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
   @Post()
-  create(@Body() createAlbumDto: CreateAlbumDto) {
-    return this.albumService.create(createAlbumDto);
+  async create(@Body() createAlbumDto: CreateAlbumDto) {
+    const album = await this.albumService.create(createAlbumDto);
+
+    return {
+      id: album.id,
+      name: album.name,
+      year: album.year,
+      artistId: album.artistId,
+    };
   }
 
   @Get()
@@ -34,11 +41,17 @@ export class AlbumController {
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateAlbumDto: UpdateAlbumDto,
   ) {
-    return this.albumService.update(id, updateAlbumDto);
+    const album = await this.albumService.update(id, updateAlbumDto);
+    return {
+      id: album.id,
+      name: album.name,
+      year: album.year,
+      artistId: album.artistId,
+    };
   }
 
   @Delete(':id')
