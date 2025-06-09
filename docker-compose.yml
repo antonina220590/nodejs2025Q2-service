@@ -46,6 +46,8 @@ services:
     networks:
       - homelibrary-net
 
+    command: npm run start:dev
+
 networks:
   homelibrary-net:
     driver: bridge
