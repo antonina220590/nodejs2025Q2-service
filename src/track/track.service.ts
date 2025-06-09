@@ -1,86 +1,55 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { DbService } from '../db/db.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { FavoritesService } from '../favs/favs.service';
+import { TrackEntity } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {
   constructor(
-    private db: DbService,
-    private favoritesService: FavoritesService,
+    @InjectRepository(TrackEntity)
+    private readonly trackRepository: Repository<TrackEntity>,
   ) {}
 
-  private checkDependencies(dto: CreateTrackDto | UpdateTrackDto) {
-    if (dto.artistId) {
-      const artist = this.db.artists.find((a) => a.id === dto.artistId);
-      if (!artist) {
-        throw new BadRequestException(
-          `Artist with id ${dto.artistId} not found`,
-        );
-      }
-    }
-    if (dto.albumId) {
-      const album = this.db.albums.find((a) => a.id === dto.albumId);
-      if (!album) {
-        throw new BadRequestException(`Album with id ${dto.albumId} not found`);
-      }
-    }
+  async create(createTrackDto: CreateTrackDto): Promise<TrackEntity> {
+    const track = this.trackRepository.create(createTrackDto);
+    return this.trackRepository.save(track);
   }
 
-  create(createTrackDto: CreateTrackDto) {
-    this.checkDependencies(createTrackDto);
-
-    const newTrack = {
-      id: uuidv4(),
-      ...createTrackDto,
-    };
-    this.db.tracks.push(newTrack);
-    return newTrack;
+  async findAll(): Promise<TrackEntity[]> {
+    return this.trackRepository.find();
   }
 
-  findAll() {
-    return this.db.tracks;
-  }
-
-  findOne(id: string) {
-    const track = this.db.tracks.find((track) => track.id === id);
+  async findOne(id: string): Promise<TrackEntity> {
+    const track = await this.trackRepository.findOne({
+      where: { id },
+      relations: ['artist', 'album'], // Загружаем связанные сущности
+    });
     if (!track) {
-      throw new NotFoundException('Track not found');
+      throw new NotFoundException(`Track with id ${id} not found`);
     }
     return track;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    this.checkDependencies(updateTrackDto);
-    const track = this.findOne(id);
-    Object.assign(track, updateTrackDto);
-    return track;
+  async update(
+    id: string,
+    updateTrackDto: UpdateTrackDto,
+  ): Promise<TrackEntity> {
+    const track = await this.trackRepository.preload({
+      id,
+      ...updateTrackDto,
+    });
+    if (!track) {
+      throw new NotFoundException(`Track with id ${id} not found`);
+    }
+    return this.trackRepository.save(track);
   }
 
-  remove(id: string) {
-    this.findOne(id);
-    this.favoritesService.removeTrack(id);
-    this.db.tracks = this.db.tracks.filter((track) => track.id !== id);
-  }
-  removeArtistIdReference(artistId: string) {
-    this.db.tracks.forEach((track) => {
-      if (track.artistId === artistId) {
-        track.artistId = null;
-      }
-    });
-  }
-
-  removeAlbumIdReference(albumId: string) {
-    this.db.tracks.forEach((track) => {
-      if (track.albumId === albumId) {
-        track.albumId = null;
-      }
-    });
+  async remove(id: string): Promise<void> {
+    const result = await this.trackRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Track with id ${id} not found`);
+    }
   }
 }

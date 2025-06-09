@@ -9,6 +9,7 @@ import { FavoritesModule } from './favs/favs.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { UserEntity } from './user/entities/user.entity';
+import { TrackEntity } from './track/entities/track.entity';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { UserEntity } from './user/entities/user.entity';
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
         synchronize: true,
-        entities: [UserEntity],
+        entities: [UserEntity, TrackEntity],
       }),
       inject: [ConfigService],
     }),
