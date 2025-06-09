@@ -15,8 +15,29 @@ export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
   @Get()
-  findAll() {
-    return this.favoritesService.findAll();
+  async findAll() {
+    const favs = await this.favoritesService.findAll();
+
+    return {
+      artists: favs.artists.map(({ id, name, grammy }) => ({
+        id,
+        name,
+        grammy,
+      })),
+      albums: favs.albums.map(({ id, name, year, artistId }) => ({
+        id,
+        name,
+        year,
+        artistId,
+      })),
+      tracks: favs.tracks.map(({ id, name, duration, artistId, albumId }) => ({
+        id,
+        name,
+        duration,
+        artistId,
+        albumId,
+      })),
+    };
   }
 
   @Post('track/:id')

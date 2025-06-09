@@ -36,7 +36,11 @@ export class FavoritesService {
 
     return this.favoritesRepository.findOne({
       where: { id: favorites.id },
-      relations: ['artists', 'albums', 'tracks'],
+      relations: {
+        artists: true,
+        albums: { artist: true },
+        tracks: { artist: true, album: true },
+      },
     });
   }
 

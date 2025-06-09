@@ -1,10 +1,11 @@
+import { Exclude } from 'class-transformer';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   VersionColumn,
+  BeforeInsert,
+  BeforeUpdate,
 } from 'typeorm';
 
 @Entity('user')
@@ -16,14 +17,26 @@ export class UserEntity {
   login: string;
 
   @Column()
+  @Exclude({ toPlainOnly: true })
   password: string;
 
   @VersionColumn()
   version: number;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
-  createdAt: Date;
+  @Column({ type: 'bigint' })
+  createdAt: number;
 
-  @UpdateDateColumn({ type: 'timestamp with time zone' })
-  updatedAt: Date;
+  @Column({ type: 'bigint' })
+  updatedAt: number;
+
+  @BeforeInsert()
+  setCreationTimestamp() {
+    this.createdAt = Date.now();
+    this.updatedAt = Date.now();
+  }
+
+  @BeforeUpdate()
+  setUpdateTimestamp() {
+    this.updatedAt = Date.now();
+  }
 }

@@ -13,27 +13,31 @@ import {
 import { UserService } from './user.service';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UserEntity } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  private formatUserResponse(user: UserEntity) {
+    const { ...rest } = user;
+    return {
+      ...rest,
+      createdAt: Number(rest.createdAt),
+      updatedAt: Number(rest.updatedAt),
+    };
+  }
+
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return result;
-  }
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+    return this.formatUserResponse(user);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.userService.findOneById(id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const user = await this.userService.findOneById(id);
+    return this.formatUserResponse(user);
   }
 
   @Put(':id')

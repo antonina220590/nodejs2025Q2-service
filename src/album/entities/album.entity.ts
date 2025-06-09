@@ -4,6 +4,7 @@ import {
   Column,
   ManyToOne,
   OneToMany,
+  RelationId,
 } from 'typeorm';
 import { ArtistEntity } from '../../artist/entities/artist.entity';
 import { TrackEntity } from '../../track/entities/track.entity';
@@ -24,6 +25,9 @@ export class AlbumEntity {
     nullable: true,
   })
   artist: ArtistEntity;
+
+  @RelationId((album: AlbumEntity) => album.artist)
+  artistId: string | null;
 
   @OneToMany(() => TrackEntity, (track) => track.album)
   tracks: TrackEntity[];
